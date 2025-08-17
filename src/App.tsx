@@ -1,8 +1,5 @@
 import { useState } from "react";
 import styled from "@emotion/styled";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-// import "./App.css";
 
 const StyledLogo = styled.img`
   height: 6em;

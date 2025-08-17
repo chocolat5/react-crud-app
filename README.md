@@ -1,10 +1,10 @@
-# react-vite-boilerplate
+# react-crud-app
 
-Vite + React + TypeScript + Emotion (ESLint + Prettier)
+This is React CRUD App built with React for my learning
 
 ## Demo
 
-[https://react-vite-boilerplate.pages.dev/](https://react-vite-boilerplate.pages.dev/)
+TBD
 
 ## Getting Started
 
@@ -30,7 +30,7 @@ npm run dev
 
 ## References
 
-参照
+https://github.com/SafdarJamal/crud-app/tree/master
 
 ## Author
 

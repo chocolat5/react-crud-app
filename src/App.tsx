@@ -1,63 +1,93 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { ReactElement } from "react";
 import styled from "@emotion/styled";
+import type { User } from "@/types";
 
-const StyledLogo = styled.img`
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-  :hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  &.react {
-    animation: logo-spin infinite 20s linear;
-    :hover {
-      filter: drop-shadow(0 0 2em #61dafbaa);
-    }
-  }
-  @keyframes logo-spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
+import { initialUsers } from "@/data";
+import { StyledButton, UserTable } from "@/components/UserTable";
+import { UserEdit } from "@/components/UserEdit";
+import { UserAdd } from "@/components/UserAdd";
+import type { ValidateError } from "@/helper";
+
+const StyledContainer = styled.div`
+  max-width: 960px;
+  margin: 0 auto;
 `;
 
-const StyledCard = styled.div`
-  padding: 2em;
+const StyledTitle = styled.h1`
+  margin: 32px 0;
+  font-size: 2.4rem;
+  font-weight: 700;
+  text-align: center;
 `;
 
-const StyledText = styled.p`
-  color: #888;
+const StyledButtonAdd = styled(StyledButton)`
+  margin: 24px 0;
+  color: #fff;
+  background-color: var(--primary);
 `;
 
-function App() {
-  const [count, setCount] = useState(0);
+export default function App(): ReactElement {
+  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [editingUser, setEditingUser] = useState<User | null>();
+  const [isAdding, setIsAdding] = useState<boolean>(false);
+  const [error, setErrors] = useState<ValidateError[]>([]);
+
+  useEffect(() => {
+    const raw = localStorage.getItem("user_data");
+    if (raw) setUsers(JSON.parse(raw));
+  }, []);
+
+  const handleAddUser = (user: User) => {
+    localStorage.setItem("user_data", JSON.stringify([...users, user]));
+    setUsers([...users, user]);
+    setIsAdding(false);
+  };
+
+  const handleDeleteUser = (id: string) => {
+    const newUsers = users.filter((u) => u.id !== id);
+    localStorage.setItem("user_data", JSON.stringify(newUsers));
+    setUsers(newUsers);
+  };
+
+  const handleEditUser = (id: string) => {
+    const [user] = users.filter((u) => u.id === id);
+    setEditingUser(user);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <StyledLogo src={viteLogo} alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <StyledLogo src={reactLogo} className="react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <StyledCard>
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </StyledCard>
-      <StyledText>Click on the Vite and React logos to learn more</StyledText>
-    </>
+    <StyledContainer>
+      <StyledTitle>React CRUD App</StyledTitle>
+      {editingUser && (
+        <UserEdit
+          users={users}
+          user={editingUser}
+          setUsers={setUsers}
+          setEditingUser={setEditingUser}
+          error={error}
+          setErrors={setErrors}
+        />
+      )}
+      {isAdding && (
+        <UserAdd
+          onAdd={handleAddUser}
+          setIsAdding={setIsAdding}
+          error={error}
+          setErrors={setErrors}
+        />
+      )}
+      {!editingUser && !isAdding && (
+        <>
+          <UserTable
+            users={users}
+            onDelete={handleDeleteUser}
+            onEdit={handleEditUser}
+          />
+          <StyledButtonAdd onClick={() => setIsAdding(true)}>
+            Add User
+          </StyledButtonAdd>
+        </>
+      )}
+    </StyledContainer>
   );
 }
-
-export default App;

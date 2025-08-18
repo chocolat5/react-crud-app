@@ -3,6 +3,5 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  date: Date;
   role: "Management" | "Member";
 }

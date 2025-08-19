@@ -5,8 +5,8 @@ import styled from "@emotion/styled";
 import type { User } from "@/types";
 import { StyledButton } from "@/components/UserTable";
 import { Error } from "@/components/Error";
-import type { ValidateError } from "@/helper";
-import { validate } from "@/helper";
+import type { ValidateError } from "@/utils/validate";
+import { validate } from "@/utils/validate";
 
 const StyledContainer = styled.div`
   width: 480px;
@@ -45,13 +45,14 @@ interface UserFormProps {
   user: User;
   setUsers: Dispatch<React.SetStateAction<User[]>>;
   setEditingUser: Dispatch<React.SetStateAction<User | null | undefined>>;
+  updateUsers: (users: User[]) => void;
 }
 
 export function UserEdit({
   users,
   user,
-  setUsers,
   setEditingUser,
+  updateUsers,
 }: UserFormProps): ReactElement {
   async function editUser(
     _prevState: { values?: Partial<User>; errors: ValidateError[] } | null,
@@ -72,13 +73,15 @@ export function UserEdit({
         setTimeout(resolve, 1000);
       });
       return { errors, values: editedUser };
-    } else {
-      const newUsers = users.map((u) => (u.id === user.id ? editedUser : u));
-      localStorage.setItem("user_data", JSON.stringify(newUsers));
-      setUsers(newUsers);
-      setEditingUser(null);
-      return { errors: [], values: user };
     }
+
+    // ユーザーを更新
+    const newUsers = users.map((u) => (u.id === user.id ? editedUser : u));
+
+    // データ保存
+    updateUsers(newUsers);
+
+    return { errors: [], values: user };
   }
 
   const [state, formAction, pending] = useActionState(editUser, {

@@ -7,6 +7,14 @@ import { initialUsers } from "@/data";
 import { StyledButton, UserTable } from "@/components/UserTable";
 import { UserEdit } from "@/components/UserEdit";
 import { UserAdd } from "@/components/UserAdd";
+import { Login } from "@/components/Login";
+import {
+  clearLoginState,
+  getLoginState,
+  getUsers,
+  saveLoginState,
+  saveUsers,
+} from "@/utils/helpers";
 
 const StyledContainer = styled.div`
   max-width: 960px;
@@ -21,30 +29,41 @@ const StyledTitle = styled.h1`
 `;
 
 const StyledButtonAdd = styled(StyledButton)`
-  margin: 24px 0;
+  margin: 24px 8px;
   color: #fff;
   background-color: var(--primary);
 `;
 
+const StyledButtonLogout = styled(StyledButton)`
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  background: none;
+`;
+
 export default function App(): ReactElement {
   const [users, setUsers] = useState<User[]>(initialUsers);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(getLoginState());
   const [editingUser, setEditingUser] = useState<User | null>();
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
   useEffect(() => {
-    const raw = localStorage.getItem("user_data");
-    if (raw) setUsers(JSON.parse(raw));
+    const data = getUsers();
+    setUsers(data);
   }, []);
 
+  useEffect(() => {
+    saveLoginState(isLoggedIn);
+  }, [isLoggedIn]);
+
   const handleAddUser = (user: User) => {
-    localStorage.setItem("user_data", JSON.stringify([...users, user]));
+    saveUsers([...users, user]);
     setUsers([...users, user]);
     setIsAdding(false);
   };
 
   const handleDeleteUser = (id: string) => {
     const newUsers = users.filter((u) => u.id !== id);
-    localStorage.setItem("user_data", JSON.stringify(newUsers));
+    saveUsers(newUsers);
     setUsers(newUsers);
   };
 
@@ -53,29 +72,52 @@ export default function App(): ReactElement {
     setEditingUser(user);
   };
 
+  const updateUsers = (users: User[]) => {
+    saveUsers(users);
+    setUsers(users);
+    setEditingUser(null);
+  };
+
   return (
     <StyledContainer>
       <StyledTitle>React CRUD App</StyledTitle>
-      {editingUser && (
-        <UserEdit
-          users={users}
-          user={editingUser}
-          setUsers={setUsers}
-          setEditingUser={setEditingUser}
-        />
-      )}
-      {isAdding && <UserAdd onAdd={handleAddUser} setIsAdding={setIsAdding} />}
-      {!editingUser && !isAdding && (
+      {isLoggedIn ? (
         <>
-          <UserTable
-            users={users}
-            onDelete={handleDeleteUser}
-            onEdit={handleEditUser}
-          />
-          <StyledButtonAdd onClick={() => setIsAdding(true)}>
-            Add User
-          </StyledButtonAdd>
+          {editingUser && (
+            <UserEdit
+              users={users}
+              user={editingUser}
+              setUsers={setUsers}
+              setEditingUser={setEditingUser}
+              updateUsers={updateUsers}
+            />
+          )}
+          {isAdding && (
+            <UserAdd onAdd={handleAddUser} setIsAdding={setIsAdding} />
+          )}
+          {!editingUser && !isAdding && (
+            <>
+              <UserTable
+                users={users}
+                onDelete={handleDeleteUser}
+                onEdit={handleEditUser}
+              />
+              <StyledButtonAdd onClick={() => setIsAdding(true)}>
+                Add User
+              </StyledButtonAdd>
+              <StyledButtonLogout
+                onClick={() => {
+                  setIsLoggedIn(false);
+                  clearLoginState();
+                }}
+              >
+                Logout
+              </StyledButtonLogout>
+            </>
+          )}
         </>
+      ) : (
+        <Login onLogin={() => setIsLoggedIn(true)} />
       )}
     </StyledContainer>
   );

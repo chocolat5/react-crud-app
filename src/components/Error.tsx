@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import styled from "@emotion/styled";
 
-import type { ValidateError } from "@/helper";
+import type { ValidateError } from "@/utils/validate";
 
 const StyledErrorContainer = styled.div`
   margin: 24px 0;

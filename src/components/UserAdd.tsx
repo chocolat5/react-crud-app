@@ -3,10 +3,10 @@ import type { ReactElement, Dispatch } from "react";
 import styled from "@emotion/styled";
 
 import type { User } from "@/types";
-import type { ValidateError } from "@/helper";
+import type { ValidateError } from "@/utils/validate";
 import { StyledButton } from "@/components/UserTable";
 import { Error } from "@/components/Error";
-import { validate } from "@/helper";
+import { validate } from "@/utils/validate";
 
 const StyledContainer = styled.div`
   width: 480px;
@@ -73,11 +73,11 @@ export function UserAdd({ onAdd, setIsAdding }: UserFormProps): ReactElement {
         setTimeout(resolve, 1000);
       });
       return { errors, values: newUser };
-    } else {
-      onAdd(newUser);
-      setIsAdding(false);
-      return { errors: [], values: initialUser };
     }
+
+    // データ保存
+    onAdd(newUser);
+    return { errors: [], values: initialUser };
   }
 
   const [state, formAction, pending] = useActionState(addUser, {

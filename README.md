@@ -2,6 +2,8 @@
 
 This is React CRUD App built with React for my learning
 
+React 18 -> https://github.com/chocolat5/react-crud-app
+
 ## Demo
 
 TBD

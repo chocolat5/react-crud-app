@@ -5,3 +5,8 @@ export interface User {
   email: string;
   role: "Management" | "Member";
 }
+
+export interface Auth {
+  email: string;
+  password: string;
+}

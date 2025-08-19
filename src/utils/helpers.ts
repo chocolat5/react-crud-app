@@ -1,6 +1,7 @@
 import type { User } from "@/types";
 
 const USER_KEY = "user_data";
+const LOGIN_KEY = "loggedin";
 
 /**
  * User
@@ -18,4 +19,19 @@ export function getUsers(): User[] {
     console.log("Failed to parse user_data from localStorage");
     return [];
   }
+}
+
+/**
+ * Login
+ */
+export function saveLoginState(isLoggedIn: boolean): void {
+  localStorage.setItem(LOGIN_KEY, String(isLoggedIn));
+}
+
+export function getLoginState(): boolean {
+  return localStorage.getItem(LOGIN_KEY) === "true";
+}
+
+export function clearLoginState(): void {
+  localStorage.removeItem(LOGIN_KEY);
 }

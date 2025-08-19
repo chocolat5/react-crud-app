@@ -5,8 +5,8 @@ import styled from "@emotion/styled";
 import type { User } from "@/types";
 import { StyledButton } from "@/components/UserTable";
 import { Error } from "@/components/Error";
-import type { ValidateError } from "@/helper";
-import { validate } from "@/helper";
+import type { ValidateError } from "@/utils/validate";
+import { validate } from "@/utils/validate";
 
 const StyledContainer = styled.div`
   width: 480px;

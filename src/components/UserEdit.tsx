@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useActionState } from "react";
 import type { Dispatch, ReactElement } from "react";
 import styled from "@emotion/styled";
 
@@ -45,8 +45,6 @@ interface UserFormProps {
   user: User;
   setUsers: Dispatch<React.SetStateAction<User[]>>;
   setEditingUser: Dispatch<React.SetStateAction<User | null | undefined>>;
-  error: ValidateError[];
-  setErrors: Dispatch<React.SetStateAction<ValidateError[]>>;
 }
 
 export function UserEdit({
@@ -54,81 +52,72 @@ export function UserEdit({
   user,
   setUsers,
   setEditingUser,
-  error,
-  setErrors,
 }: UserFormProps): ReactElement {
-  const [currentUser, setCurrentUser] = useState<User>(user);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  async function editUser(
+    _prevState: { values?: Partial<User>; errors: ValidateError[] } | null,
+    formData: FormData
+  ) {
+    const editedUser: User = {
+      ...user,
+      firstName: formData.get("firstName") as string,
+      lastName: formData.get("lastName") as string,
+      email: formData.get("email") as string,
+      role: formData.get("role") as User["role"],
+    };
 
     // validate
-    const validateErrors = validate(currentUser);
-    setErrors(validateErrors);
-    if (validateErrors.length > 0) return;
+    const errors = validate(editedUser);
+    if (errors.length > 0) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 1000);
+      });
+      return { errors, values: editedUser };
+    } else {
+      const newUsers = users.map((u) => (u.id === user.id ? editedUser : u));
+      localStorage.setItem("user_data", JSON.stringify(newUsers));
+      setUsers(newUsers);
+      setEditingUser(null);
+      return { errors: [], values: user };
+    }
+  }
 
-    const newUsers = users.map((u) =>
-      u.id === currentUser.id ? currentUser : u
-    );
-    localStorage.setItem("user_data", JSON.stringify(newUsers));
-    setUsers(newUsers);
-    setEditingUser(null);
-    setErrors([]);
-  };
+  const [state, formAction, pending] = useActionState(editUser, {
+    errors: [],
+    values: user,
+  });
 
   return (
     <StyledContainer>
-      <form onSubmit={handleSubmit}>
+      <form action={formAction}>
         <StyledInput
+          name="firstName"
           placeholder="First Name"
-          value={currentUser.firstName}
-          onChange={(e) =>
-            setCurrentUser({
-              ...currentUser,
-              firstName: e.target.value,
-            })
-          }
-          required
+          defaultValue={state.values?.firstName ?? ""}
         />
         <StyledInput
+          name="lastName"
           placeholder="Last Name"
-          value={currentUser.lastName}
-          onChange={(e) =>
-            setCurrentUser({
-              ...currentUser,
-              lastName: e.target.value,
-            })
-          }
-          required
+          defaultValue={state.values?.lastName ?? ""}
         />
         <StyledInput
+          name="email"
           placeholder="Email"
-          value={currentUser.email}
-          onChange={(e) =>
-            setCurrentUser({
-              ...currentUser,
-              email: e.target.value,
-            })
-          }
-          required
+          defaultValue={state.values?.email ?? ""}
         />
         <StyledSelect
-          value={currentUser.role}
-          onChange={(e) =>
-            setCurrentUser({
-              ...currentUser,
-              role: e.target.value as "Management" | "Member",
-            })
-          }
+          name="role"
+          defaultValue={state.values?.role ?? user.role}
         >
           <option value="Management">Management</option>
           <option value="Member">Member</option>
         </StyledSelect>
-        <StyledButtonSave type="submit">Save</StyledButtonSave>
+        <StyledButtonSave type="submit">
+          {pending ? "Waiting..." : "Save"}
+        </StyledButtonSave>
         <StyledButtonCancel onClick={() => setEditingUser(null)}>
           Cancel
         </StyledButtonCancel>
-        {error && <Error error={error} />}
+        {state.errors.length > 0 && <Error error={state.errors} />}
       </form>
     </StyledContainer>
   );

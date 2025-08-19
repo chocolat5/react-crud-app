@@ -7,7 +7,6 @@ import { initialUsers } from "@/data";
 import { StyledButton, UserTable } from "@/components/UserTable";
 import { UserEdit } from "@/components/UserEdit";
 import { UserAdd } from "@/components/UserAdd";
-import type { ValidateError } from "@/helper";
 
 const StyledContainer = styled.div`
   max-width: 960px;
@@ -31,7 +30,6 @@ export default function App(): ReactElement {
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [editingUser, setEditingUser] = useState<User | null>();
   const [isAdding, setIsAdding] = useState<boolean>(false);
-  const [error, setErrors] = useState<ValidateError[]>([]);
 
   useEffect(() => {
     const raw = localStorage.getItem("user_data");
@@ -64,18 +62,9 @@ export default function App(): ReactElement {
           user={editingUser}
           setUsers={setUsers}
           setEditingUser={setEditingUser}
-          error={error}
-          setErrors={setErrors}
         />
       )}
-      {isAdding && (
-        <UserAdd
-          onAdd={handleAddUser}
-          setIsAdding={setIsAdding}
-          error={error}
-          setErrors={setErrors}
-        />
-      )}
+      {isAdding && <UserAdd onAdd={handleAddUser} setIsAdding={setIsAdding} />}
       {!editingUser && !isAdding && (
         <>
           <UserTable

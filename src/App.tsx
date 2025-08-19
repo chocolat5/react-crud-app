@@ -47,12 +47,13 @@ export default function App(): ReactElement {
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
   useEffect(() => {
-    const data = getUsers();
-    setUsers(data);
-  }, []);
+    saveLoginState(isLoggedIn);
+  }, [isLoggedIn]);
 
   useEffect(() => {
-    saveLoginState(isLoggedIn);
+    if (isLoggedIn) {
+      setUsers(getUsers());
+    }
   }, [isLoggedIn]);
 
   const handleAddUser = (user: User) => {

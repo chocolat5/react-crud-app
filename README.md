@@ -2,6 +2,10 @@
 
 This is React CRUD App built with React for my learning
 
+**React 19**
+repo: https://github.com/chocolat5/react-crud-app/tree/react19
+deploy: https://1a7a61a8.react-crud-app.pages.dev/
+
 ## Demo
 
 TBD

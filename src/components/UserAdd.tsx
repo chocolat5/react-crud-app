@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useActionState } from "react";
 import type { ReactElement, Dispatch } from "react";
 import styled from "@emotion/styled";
 
@@ -43,16 +43,9 @@ const StyledButtonCancel = styled(StyledButton)`
 interface UserFormProps {
   onAdd: (user: User) => void;
   setIsAdding: Dispatch<React.SetStateAction<boolean>>;
-  error: ValidateError[];
-  setErrors: Dispatch<React.SetStateAction<ValidateError[]>>;
 }
 
-export function UserAdd({
-  onAdd,
-  setIsAdding,
-  error,
-  setErrors,
-}: UserFormProps): ReactElement {
+export function UserAdd({ onAdd, setIsAdding }: UserFormProps): ReactElement {
   const initialUser: User = {
     id: "",
     firstName: "",
@@ -60,76 +53,70 @@ export function UserAdd({
     email: "",
     role: "Member",
   };
-  const [inputUser, setInputUser] = useState<User>(initialUser);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  async function addUser(
+    _prevState: { values?: Partial<User>; errors: ValidateError[] } | null,
+    formData: FormData
+  ) {
+    const newUser: User = {
+      id: crypto.randomUUID().slice(0, 8),
+      firstName: formData.get("firstName") as string,
+      lastName: formData.get("lastName") as string,
+      email: formData.get("email") as string,
+      role: formData.get("role") as User["role"],
+    };
 
     // validate
-    const validateErrors = validate(inputUser);
-    setErrors(validateErrors);
-    if (validateErrors.length > 0) return;
+    const errors = validate(newUser);
+    if (errors.length > 0) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 1000);
+      });
+      return { errors, values: newUser };
+    } else {
+      onAdd(newUser);
+      setIsAdding(false);
+      return { errors: [], values: initialUser };
+    }
+  }
 
-    const newUser: User = {
-      ...inputUser,
-      id: crypto.randomUUID().slice(0, 8),
-    };
-    onAdd(newUser);
-    // reset
-    setInputUser(initialUser);
-    setErrors([]);
-  };
+  const [state, formAction, pending] = useActionState(addUser, {
+    errors: [],
+    values: initialUser,
+  });
 
   return (
     <StyledContainer>
-      <form onSubmit={handleSubmit}>
+      <form action={formAction}>
         <StyledInput
+          name="firstName"
           placeholder="First Name"
-          value={inputUser.firstName}
-          onChange={(e) =>
-            setInputUser({
-              ...inputUser,
-              firstName: e.target.value,
-            })
-          }
+          defaultValue={state.values?.firstName ?? ""}
         />
         <StyledInput
+          name="lastName"
           placeholder="Last Name"
-          value={inputUser.lastName}
-          onChange={(e) =>
-            setInputUser({
-              ...inputUser,
-              lastName: e.target.value,
-            })
-          }
+          defaultValue={state.values?.lastName ?? ""}
         />
         <StyledInput
+          name="email"
           placeholder="Email"
-          value={inputUser.email}
-          onChange={(e) =>
-            setInputUser({
-              ...inputUser,
-              email: e.target.value,
-            })
-          }
+          defaultValue={state.values?.email ?? ""}
         />
         <StyledSelect
-          value={inputUser.role}
-          onChange={(e) =>
-            setInputUser({
-              ...inputUser,
-              role: e.target.value as "Management" | "Member",
-            })
-          }
+          name="role"
+          defaultValue={state.values?.role ?? initialUser.role}
         >
           <option value="Management">Management</option>
           <option value="Member">Member</option>
         </StyledSelect>
-        <StyledButtonAdd type="submit">Add</StyledButtonAdd>
+        <StyledButtonAdd type="submit" disabled={pending}>
+          {pending ? "Waiting..." : "Add"}
+        </StyledButtonAdd>
         <StyledButtonCancel onClick={() => setIsAdding(false)}>
           Cancel
         </StyledButtonCancel>
-        {error && <Error error={error} />}
+        {state.errors.length > 0 && <Error error={state.errors} />}
       </form>
     </StyledContainer>
   );

@@ -7,6 +7,7 @@ import { initialUsers } from "@/data";
 import { StyledButton, UserTable } from "@/components/UserTable";
 import { UserEdit } from "@/components/UserEdit";
 import { UserAdd } from "@/components/UserAdd";
+import { getUsers, saveUsers } from "@/utils/helpers";
 
 const StyledContainer = styled.div`
   max-width: 960px;
@@ -32,25 +33,31 @@ export default function App(): ReactElement {
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
   useEffect(() => {
-    const raw = localStorage.getItem("user_data");
-    if (raw) setUsers(JSON.parse(raw));
+    const data = getUsers();
+    setUsers(data);
   }, []);
 
   const handleAddUser = (user: User) => {
-    localStorage.setItem("user_data", JSON.stringify([...users, user]));
+    saveUsers([...users, user]);
     setUsers([...users, user]);
     setIsAdding(false);
   };
 
   const handleDeleteUser = (id: string) => {
     const newUsers = users.filter((u) => u.id !== id);
-    localStorage.setItem("user_data", JSON.stringify(newUsers));
+    saveUsers(newUsers);
     setUsers(newUsers);
   };
 
   const handleEditUser = (id: string) => {
     const [user] = users.filter((u) => u.id === id);
     setEditingUser(user);
+  };
+
+  const updateUsers = (users: User[]) => {
+    saveUsers(users);
+    setUsers(users);
+    setEditingUser(null);
   };
 
   return (
@@ -62,6 +69,7 @@ export default function App(): ReactElement {
           user={editingUser}
           setUsers={setUsers}
           setEditingUser={setEditingUser}
+          updateUsers={updateUsers}
         />
       )}
       {isAdding && <UserAdd onAdd={handleAddUser} setIsAdding={setIsAdding} />}

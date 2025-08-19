@@ -73,11 +73,11 @@ export function UserAdd({ onAdd, setIsAdding }: UserFormProps): ReactElement {
         setTimeout(resolve, 1000);
       });
       return { errors, values: newUser };
-    } else {
-      onAdd(newUser);
-      setIsAdding(false);
-      return { errors: [], values: initialUser };
     }
+
+    // データ保存
+    onAdd(newUser);
+    return { errors: [], values: initialUser };
   }
 
   const [state, formAction, pending] = useActionState(addUser, {

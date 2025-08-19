@@ -3,7 +3,6 @@ import type { ReactElement } from "react";
 import styled from "@emotion/styled";
 import type { User } from "@/types";
 
-import { initialUsers } from "@/data";
 import { StyledButton, UserTable } from "@/components/UserTable";
 import { UserEdit } from "@/components/UserEdit";
 import { UserAdd } from "@/components/UserAdd";
@@ -41,19 +40,13 @@ const StyledButtonLogout = styled(StyledButton)`
 `;
 
 export default function App(): ReactElement {
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>(getUsers());
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(getLoginState());
   const [editingUser, setEditingUser] = useState<User | null>();
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
   useEffect(() => {
     saveLoginState(isLoggedIn);
-  }, [isLoggedIn]);
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      setUsers(getUsers());
-    }
   }, [isLoggedIn]);
 
   const handleAddUser = (user: User) => {

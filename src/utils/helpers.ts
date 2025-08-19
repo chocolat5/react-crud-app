@@ -1,4 +1,5 @@
 import type { User } from "@/types";
+import { initialUsers } from "@/data";
 
 const USER_KEY = "user_data";
 const LOGIN_KEY = "loggedin";
@@ -12,12 +13,12 @@ export function saveUsers(users: User[]): void {
 
 export function getUsers(): User[] {
   const data = localStorage.getItem(USER_KEY);
-  if (!data) return [];
+  if (!data) return initialUsers;
   try {
     return JSON.parse(data);
   } catch {
     console.log("Failed to parse user_data from localStorage");
-    return [];
+    return initialUsers;
   }
 }
 

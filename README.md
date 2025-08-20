@@ -1,6 +1,6 @@
 # react-crud-app
 
-This is React CRUD App built with React for my learning
+React CRUD App built using React 19 for my learning
 
 
 ## Demo
